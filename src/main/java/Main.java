@@ -14,7 +14,18 @@ import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws UnsupportedEncodingException {
-        String url = "https://weburg.net/movies/info/1";
+        String url = "https://weburg.net/movies/info/";
+
+        for (int i =1;i<150;i++) {
+            String s = url+ i;
+            System.out.println(s);
+
+        parser(s);
+        }
+    }
+
+    public static void parser(String url){
+
         Document page = null;
         try {
             page = Jsoup.connect(url)
@@ -48,13 +59,17 @@ public class Main {
 //            System.out.println(s + ":" + film.get(s));
 //        }
 
-
             for (Element e:elements) {
-                String s = new String(e.text().getBytes("UTF-8"));
+                String s = null;
+                try {
+                    s = new String(e.text().getBytes("UTF-8"));
+                } catch (UnsupportedEncodingException ex) {
+                    ex.printStackTrace();
+                }
                 System.out.println(s);
             }
         }
 
-
     }
+
 }
