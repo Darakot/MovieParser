@@ -9,22 +9,38 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class Main {
-    public static void main(String[] args) throws UnsupportedEncodingException {
+    public static void main(String[] args) {
         String url = "https://weburg.net/movies/info/";
+//        String url = "https://www.kinopoisk.ru/film/";
 
-        for (int i =1;i<150;i++) {
-            String s = url+ i;
-            System.out.println(s);
-
-        parser(s);
+        for (int i =1;i<400;i++) {
+            String sURL = url+ i;
+            Map<String,String> info = parser(sURL);
+            System.out.println(info.get("Название"));
+            System.out.println(info.get("Режиссер"));
+            System.out.println(info.get("Актеры"));
+            System.out.println(info.get("Описание"));
+            System.out.println("------------------------------------------------------------------------------------");
         }
+
+//        url+=1000;
+//        HashMap<String,String> info = parser(url);
+//
+//
+//
+//        for (String s :info.keySet()) {
+//            System.out.println(s + ":" + info.get(s));
+//        }
+
+
     }
 
-    public static void parser(String url){
+
+    public static HashMap<String, String> parser(String url) {
+        Map<String, String> description = new HashMap<>();
 
         Document page = null;
         try {
@@ -32,44 +48,45 @@ public class Main {
                     .userAgent("Chrome/74.0.3729.169 Safari/537.36")
                     .referrer("http://www.google.com")
                     .get();
-        }catch (NullPointerException e) {
-            e.getMessage();}
-        catch (HttpStatusException e) {
-            System.out.println(e.getStatusCode());
-        }catch (IOException e) {
+        } catch (NullPointerException e) {
+            e.getMessage();
+        } catch (HttpStatusException e) {
+            System.out.println(url + " " +e.getStatusCode());
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
-//        Map<String,String> film = new HashMap<>();
-//        Element nameFilm = page.select("h3.wb-promo-box-heading").first();
-//        Element annotationFilm = page.select("table.wb-layout-about").first();
-//        Element directorFilm = page.select("li.wb-tags-series-item").first();
-//        Elements elements = page.select("div.wb-tags-series");
-//        String sDirectorFilm = new String(directorFilm.text().getBytes("UTF-8"));
-//        String sAnnotationFilm = new String(annotationFilm.select("p").text().getBytes("UTF-8"));
-//        String sNameFilm = new String(nameFilm.text().getBytes("UTF-8"));
-//        film.put("Название фильма",sNameFilm);
-//        film.put("Режиссер",sDirectorFilm);
-//        film.put("Описание",sAnnotationFilm);
 
 
-        if (page!=null) {
-            Elements elements = page.select("div.wb-tags-series");
-//        for (String s :film.keySet()) {
-//            System.out.println(s + ":" + film.get(s));
-//        }
-
-            for (Element e:elements) {
-                String s = null;
+        if (page != null) {
+            Element movieTitle = page.select("h3.wb-promo-box-heading").first();
+            Element filmDescription = page.select("table.wb-layout-about").first();
+            Elements movieInfo = page.select("div.wb-tags-series");
+            Element movieRatings = page.select("ul.external-ratings__list").first();
+            String sAnnotationFilm = null;
+            String sNameFilm = null;
+            System.out.println(movieRatings);
+            try {
+                sNameFilm = new String(movieTitle.text().getBytes("UTF-8"));
+                sAnnotationFilm = new String(filmDescription.select("p").text().getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            description.put("Название", sNameFilm);
+            description.put("Описание", sAnnotationFilm);
+            for (Element eMovieInfo : movieInfo) {
+                String sMovieInfo = null;
                 try {
-                    s = new String(e.text().getBytes("UTF-8"));
+                    sMovieInfo = new String(eMovieInfo.text().getBytes("UTF-8"));
                 } catch (UnsupportedEncodingException ex) {
                     ex.printStackTrace();
                 }
-                System.out.println(s);
+                String[] sPr = sMovieInfo.split(":");
+                description.put(sPr[0], sPr[1]);
             }
-        }
 
+        }
+        return (HashMap<String, String>) description;
     }
 
 }
